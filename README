@@ -1,37 +1,25 @@
+# WARNING: This isnt a drop in replacement! The config and the way you need to set certian values has changed!
+# Changes:
+# - Removed "Monitor Commands" and "Commands". You do not have to specify which commands you want to monitor. You can from now on simply monitor all of them. To ignore them just dont write regex which matches.
+# - Its no longer possible to define a regex over multiple lines. Just use a "|" to combine the regex.
+# - Removed the AntiSpam and AntiRepeat function. Feel free to use another plugin like 2ls chatsentinel for that. (Or make a PR to add a good AntiSpam and AntiRepeat)
+# + You may define a "server" per rule. This has to be a regex and the actions will only execute if the regex finds a match with the server name. If its ommited it will not check the server name.
+# + You may use the "permissiontype" field to define how a permission check should work. You may either have a bypass permission or a required permission. Default is: BYPASS
+
 ##########################################
 ##                                      ##
 ##      Bungee Chat Filter Config       ##
-##               v1.2                   ##
+##               v2.0                   ##
 ##########################################
-
-#Monitor commands - Monitor commands send by the players as chat
-Monitor Commands: true
-
-#Commands - The list of commands that the plugin will monitor
-Commands:
-    - msg
-    - message
-    - tell
-    - whisper
-    - w
-    - g
-    - global
-    - s
-    - l
-    - local
-    - hub
-
-#AntiSpam - Will use the minimum chat delay to force players to wait *1500ms or what ever you specified between messages
-AntiSpam: true
-#Minimum-Chat-Delay - The time in miliseconds a player must wait between messages
-Minimum-Chat-Delay: 1500
 
 #Rules - Groups of rules which monitor the chat
 #rules:
 #   rulename:  - the name of the rule
 #       regex:  - the string regex that the rule will check for
 #       ignores:  - If the message contains a value that matches ignore then none of the actions will be performed
-#       permission: - the permission required to bypass this rule
+#       permission: - the permission required to bypass or use this rule
+#       permissiontype: - either "BYPASS" or "REQUIRED" depending on how the permission should the used
+#       server: - a regex to define on which servers a rule is valid
 #       actions: - here is the list of actions the rule will perform if matched
 #           deny: true      - this will deny the message and cancel the event
 #           message: (message)      -this will send a message (message) to the player
@@ -60,25 +48,6 @@ rules:
                 - frack
                 - funk
                 - fork
-
-#Filters the list of swear words below and replaces them with a random word from the list. Uses a list as the regex
-#The first item has (?i)(cunt to make the generated regex case insensitive.  The last item must end with a )
-    swearfilter2:
-        regex:
-            - (?i)(cunt
-            - whore
-            - fag
-            - slut
-            - queer
-            - bitch
-            - bastard
-            - dick
-            - gay)
-        actions:
-            replace:
-                - lovely
-                - sweetie
-                - sexy
 
 #Filters the word nigger and denys the chat even while kicking the player and alerting the server why the player was kicked
     swearfilter3:
@@ -116,6 +85,7 @@ rules:
     AntiFormatText:
         regex: '&[k-o]'
         permission: bungeefilter.antiformatbypass
+        server: (?i)bedwars.*
         actions:
             remove: true
             message: '&cYou do not have permission to use Format text'
@@ -153,7 +123,8 @@ rules:
 #Creates a proxywide broadcast command !bungeefilter.broadcast means the player needs the permission for the check to work
     CreateCommand:
         regex: /broadcast
-        permission: "!bungeefilter.broadcast"
+        permission: "bungeefilter.broadcast"
+        permissiontype: REQUIRED
         actions:
             alert: '&5[Broadcast]&a{player}&f:{arguments}'
             deny: true
