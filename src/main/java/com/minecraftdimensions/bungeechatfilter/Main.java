@@ -1,110 +1,115 @@
 package com.minecraftdimensions.bungeechatfilter;
 
 import com.minecraftdimensions.bungeechatfilter.configlibrary.Config;
-import net.md_5.bungee.api.ChatColor;
+import lombok.Getter;
+import lombok.Setter;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends Plugin {
 
-    public static long SPAMTIMER = 0;
-    public static Boolean COMMANDS;
-    public static List<String> COMLIST;
-    public static ArrayList<Rule> RULES;
-    public static HashMap<String, Long> ANTISPAM = new HashMap<>();
-    public static HashMap<String, String> ANTIREPEAT = new HashMap<>(  );
-    public static boolean NOSPAM;
-    public static boolean NOREPEAT;
-    public static Config c;
+    @Getter
+    private static Main instance;
+
+    @Getter
+    private long spamtimer = 0;
+
+    @Getter
+    private ArrayList<Rule> rules;
+
+    @Getter
+    private final HashMap<String, Instant> antispam = new HashMap<>();
+
+    @Getter
+    private final HashMap<String, String> antirepeat = new HashMap<>();
+
+    @Getter
+    @Setter
+    private boolean nospam;
+
+    @Getter
+    @Setter
+    private boolean norepeat;
+
+    @Getter
+    @Setter
+    private Config config;
+
+    @Getter
+    private static Logger logger;
 
     public void onEnable() {
+        instance = this;
         initialiseConfig();
-        this.getProxy().getPluginManager().registerListener( this, new PlayerChatListener() );
-        this.getProxy().getPluginManager().registerCommand( this, new BFReload("bungeefilterreload", "bungeefilter.reload", "bfreload", "reloadbf" ) );
+        this.getProxy().getPluginManager().registerListener(this, new PlayerChatListener());
+        this.getProxy().getPluginManager().registerCommand(this, new BFReload("bungeefilterreload", "bungeefilter.reload", "bfreload", "reloadbf"));
+        logger = this.getProxy().getLogger();
     }
 
     private void initialiseConfig() {
-        File file = new File( this.getDataFolder().getAbsoluteFile() + File.separator + "config.yml" );
-        if ( !file.exists() ) {
+        File file = new File(this.getDataFolder().getAbsoluteFile() + File.separator + "config.yml");
+        if (!file.exists()) {
             file.getParentFile().mkdirs();
             try {
                 file.createNewFile();
-            } catch ( IOException e ) {
+            } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
 
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("config.yml");
 
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream( "config.yml" );
-
-            try {
-
-                OutputStream os = null;
-
-                os = new FileOutputStream( file );
-
+            try (OutputStream os = new FileOutputStream(file)) {
                 byte[] buffer = new byte[4096];
                 int bytesRead;
-                while ( ( bytesRead = is.read( buffer ) ) != -1 ) {
-                    try {
-                        os.write( buffer, 0, bytesRead );
-                    } catch ( IOException e ) {
-                        e.printStackTrace();
-                    }
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
                 }
                 is.close();
-                os.close();
-            } catch ( IOException e ) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        c = MainConfig.c;
-        COMMANDS = c.getBoolean( "Monitor Commands", true );
-        List<String> defaultList = new ArrayList<>();
-        defaultList.add( "message" );
-        defaultList.add( "msg" );
-        COMLIST = c.getListString( "Commands", defaultList );
-        NOSPAM = c.getBoolean( "AntiSpam", true );
-        NOREPEAT = c.getBoolean( "AntiRepeat", true );
-        SPAMTIMER = c.getInt( "Minimum-Chat-Delay" ) ;
+        config = MainConfig.config;
+        nospam = config.getBoolean("AntiSpam", true);
+        norepeat = config.getBoolean("AntiRepeat", true);
+        spamtimer = config.getInt("Minimum-Chat-Delay");
         loadRules();
     }
 
-    public static void loadRules() {
-        RULES = new ArrayList<>();
-        List<String> nodes = c.getSubNodes( "rules" );
-        for ( String node : nodes ) {
-            String regex = "";
-                List<String> strList = c.getListString( "rules."+node+".regex" ) ;
-                for(String str:strList){
-                   regex+=str+"|";
-                }
-            if(regex.length()==0){
-             regex = c.getString( "rules." + node + ".regex" );
-            }     else{
-                regex = regex.substring( 0,regex.length()-1 );
-            }
-            String perm = c.getString( "rules." + node + ".permission" );
-            String ignore = c.getString( "rules." + node + ".ignores" );
-            HashMap<String, String[]> actions = new HashMap<>();
-            for ( String action : c.getSubNodes( "rules." + node + ".actions" ) ) {
-                if ( action.equals( "replace" ) ) {
-                    List<String> strlist = c.getListString( "rules." + node + ".actions.replace" );
-                    actions.put( action, strlist.toArray( new String[strlist.size()] ) );
-                } else {
-                    actions.put( action, new String[] { c.getString( "rules." + node + ".actions." + action ) } );
-                }
-            }
-            RULES.add( new Rule( regex, actions, perm, ignore ) );
+    public void loadRules() {
+        rules = new ArrayList<>();
+        List<String> nodes = config.getSubNodes("rules");
+        for (String node : nodes) {
+            String regex = config.getString("rules." + node + ".regex");
+            String perm = config.getString("rules." + node + ".permission");
+            String ignore = config.getString("rules." + node + ".ignores");
+            String server = config.getString("rules." + node + ".server");
+            PermissionType permissionType = PermissionType.valueOf(config.getString("rules." + node + ".server"));
+            Map<String, String[]> actions = extractActions(node);
+
+            rules.add(new Rule(regex, actions, perm, ignore, server, permissionType));
         }
-        System.out.println( RULES.size() + " filter rules loaded!" );
+        logger.log(Level.INFO, rules.size() + " filter rules loaded!");
     }
 
-
-    public String color( String s ) {
-        return ChatColor.translateAlternateColorCodes( '&', s );
+    private Map<String, String[]> extractActions(String node) {
+        Map<String, String[]> actions = new HashMap<>();
+        for (String action : config.getSubNodes("rules." + node + ".actions")) {
+            if (action.equals("replace")) {
+                List<String> strlist = config.getListString("rules." + node + ".actions.replace");
+                actions.put(action, strlist.toArray(new String[0]));
+            } else {
+                actions.put(action, new String[]{config.getString("rules." + node + ".actions." + action)});
+            }
+        }
+        return actions;
     }
 }

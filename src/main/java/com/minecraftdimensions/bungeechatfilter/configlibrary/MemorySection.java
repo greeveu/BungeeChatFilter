@@ -365,10 +365,10 @@ public class MemorySection implements ConfigurationSection {
             } else if ( object instanceof String ) {
                 try {
                     result.add( Integer.valueOf( ( String ) object ) );
-                } catch ( Exception ex ) {
+                } catch ( Exception ignored) {
                 }
             } else if ( object instanceof Character ) {
-                result.add( ( int ) ( ( Character ) object ).charValue() );
+                result.add( ( int ) (Character) object);
             } else if ( object instanceof Number ) {
                 result.add( ( ( Number ) object ).intValue() );
             }
@@ -416,10 +416,10 @@ public class MemorySection implements ConfigurationSection {
             } else if ( object instanceof String ) {
                 try {
                     result.add( Double.valueOf( ( String ) object ) );
-                } catch ( Exception ex ) {
+                } catch ( Exception ignored) {
                 }
             } else if ( object instanceof Character ) {
-                result.add( ( double ) ( ( Character ) object ).charValue() );
+                result.add( ( double ) (Character) object);
             } else if ( object instanceof Number ) {
                 result.add( ( ( Number ) object ).doubleValue() );
             }
@@ -443,10 +443,10 @@ public class MemorySection implements ConfigurationSection {
             } else if ( object instanceof String ) {
                 try {
                     result.add( Float.valueOf( ( String ) object ) );
-                } catch ( Exception ex ) {
+                } catch ( Exception ignored) {
                 }
             } else if ( object instanceof Character ) {
-                result.add( ( float ) ( ( Character ) object ).charValue() );
+                result.add( ( float ) (Character) object);
             } else if ( object instanceof Number ) {
                 result.add( ( ( Number ) object ).floatValue() );
             }
@@ -470,10 +470,10 @@ public class MemorySection implements ConfigurationSection {
             } else if ( object instanceof String ) {
                 try {
                     result.add( Long.valueOf( ( String ) object ) );
-                } catch ( Exception ex ) {
+                } catch ( Exception ignored) {
                 }
             } else if ( object instanceof Character ) {
-                result.add( ( long ) ( ( Character ) object ).charValue() );
+                result.add( ( long ) (Character) object);
             } else if ( object instanceof Number ) {
                 result.add( ( ( Number ) object ).longValue() );
             }
@@ -497,7 +497,7 @@ public class MemorySection implements ConfigurationSection {
             } else if ( object instanceof String ) {
                 try {
                     result.add( Byte.valueOf( ( String ) object ) );
-                } catch ( Exception ex ) {
+                } catch ( Exception ignored) {
                 }
             } else if ( object instanceof Character ) {
                 result.add( ( byte ) ( ( Character ) object ).charValue() );
@@ -550,7 +550,7 @@ public class MemorySection implements ConfigurationSection {
             } else if ( object instanceof String ) {
                 try {
                     result.add( Short.valueOf( ( String ) object ) );
-                } catch ( Exception ex ) {
+                } catch ( Exception ignored) {
                 }
             } else if ( object instanceof Character ) {
                 result.add( ( short ) ( ( Character ) object ).charValue() );
@@ -618,7 +618,7 @@ public class MemorySection implements ConfigurationSection {
 
                 if ( ( deep ) && ( entry.getValue() instanceof ConfigurationSection ) ) {
                     ConfigurationSection subsection = ( ConfigurationSection ) entry.getValue();
-                    mapChildrenKeys( output, subsection, deep );
+                    mapChildrenKeys( output, subsection, true);
                 }
             }
         } else {
@@ -639,7 +639,7 @@ public class MemorySection implements ConfigurationSection {
 
                 if ( entry.getValue() instanceof ConfigurationSection ) {
                     if ( deep ) {
-                        mapChildrenValues( output, ( ConfigurationSection ) entry.getValue(), deep );
+                        mapChildrenValues( output, ( ConfigurationSection ) entry.getValue(), true);
                     }
                 }
             }
@@ -653,7 +653,7 @@ public class MemorySection implements ConfigurationSection {
     }
 
     public static String createPath( ConfigurationSection section, String key ) {
-        return createPath( section, key, ( section == null ) ? null : section.getRoot() );
+        return createPath( section, key, section.getRoot());
     }
 
     public static String createPath( ConfigurationSection section, String key, ConfigurationSection relativeTo ) {
@@ -664,14 +664,12 @@ public class MemorySection implements ConfigurationSection {
         char separator = root.options().pathSeparator();
 
         StringBuilder builder = new StringBuilder();
-        if ( section != null ) {
-            for ( ConfigurationSection parent = section; ( parent != null ) && ( parent != relativeTo ); parent = parent.getParent() ) {
-                if ( builder.length() > 0 ) {
-                    builder.insert( 0, separator );
-                }
-
-                builder.insert( 0, parent.getName() );
+        for ( ConfigurationSection parent = section; ( parent != null ) && ( parent != relativeTo ); parent = parent.getParent() ) {
+            if ( builder.length() > 0 ) {
+                builder.insert( 0, separator );
             }
+
+            builder.insert( 0, parent.getName() );
         }
 
         if ( ( key != null ) && ( key.length() > 0 ) ) {
@@ -688,6 +686,6 @@ public class MemorySection implements ConfigurationSection {
     @Override
     public String toString() {
         Configuration root = getRoot();
-        return new StringBuilder().append( getClass().getSimpleName() ).append( "[path='" ).append( getCurrentPath() ).append( "', root='" ).append( root == null ? null : root.getClass().getSimpleName() ).append( "']" ).toString();
+        return getClass().getSimpleName() + "[path='" + getCurrentPath() + "', root='" + (root == null ? null : root.getClass().getSimpleName()) + "']";
     }
 }

@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class ConfigurationSerialization {
     public static final String SERIALIZED_TYPE_KEY = "==";
     private final Class<? extends ConfigurationSerializable> clazz;
-    private static Map<String, Class<? extends ConfigurationSerializable>> aliases = new HashMap<String, Class<? extends ConfigurationSerializable>>();
+    private static final Map<String, Class<? extends ConfigurationSerializable>> aliases = new HashMap<String, Class<? extends ConfigurationSerializable>>();
 
     protected ConfigurationSerialization( Class<? extends ConfigurationSerializable> clazz ) {
         this.clazz = clazz;
@@ -53,7 +53,7 @@ public class ConfigurationSerialization {
             ConfigurationSerializable result = ( ConfigurationSerializable ) method.invoke( null, args );
 
             if ( result == null ) {
-                Logger.getLogger( ConfigurationSerialization.class.getName() ).log( Level.SEVERE, "Could not call method '" + method.toString() + "' of " + clazz + " for deserialization: method returned null" );
+                Logger.getLogger( ConfigurationSerialization.class.getName() ).log( Level.SEVERE, "Could not call method '" + method + "' of " + clazz + " for deserialization: method returned null" );
             } else {
                 return result;
             }
@@ -77,14 +77,12 @@ public class ConfigurationSerialization {
     public ConfigurationSerializable deserialize( Map<String, Object> args ) {
 
         ConfigurationSerializable result = null;
-        Method method = null;
+        Method method;
 
-        if ( result == null ) {
-            method = getMethod( "deserialize", true );
+        method = getMethod( "deserialize", true );
 
-            if ( method != null ) {
-                result = deserializeViaMethod( method, args );
-            }
+        if ( method != null ) {
+            result = deserializeViaMethod( method, args );
         }
 
         if ( result == null ) {
@@ -111,7 +109,7 @@ public class ConfigurationSerialization {
     }
 
     public static ConfigurationSerializable deserializeObject( Map<String, Object> args ) {
-        Class<? extends ConfigurationSerializable> clazz = null;
+        Class<? extends ConfigurationSerializable> clazz;
 
         if ( args.containsKey( SERIALIZED_TYPE_KEY ) ) {
             try {
@@ -135,15 +133,6 @@ public class ConfigurationSerialization {
         return new ConfigurationSerialization( clazz ).deserialize( args );
     }
 
-    //    public static void registerClass(Class<? extends ConfigurationSerializable> clazz) {
-    //        DelegateDeserialization delegate = clazz.getAnnotation(DelegateDeserialization.class);
-    //
-    //        if (delegate == null) {
-    //            registerClass(clazz, getAlias(clazz));
-    //            registerClass(clazz, clazz.getName());
-    //        }
-    //    }
-
     public static void registerClass( Class<? extends ConfigurationSerializable> clazz, String alias ) {
         aliases.put( alias, clazz );
     }
@@ -154,7 +143,6 @@ public class ConfigurationSerialization {
 
     public static void unregisterClass( Class<? extends ConfigurationSerializable> clazz ) {
         while ( aliases.values().remove( clazz ) ) {
-            ;
         }
     }
 
@@ -173,12 +161,10 @@ public class ConfigurationSerialization {
             }
         }
 
-        if ( delegate == null ) {
-            SerializableAs alias = clazz.getAnnotation( SerializableAs.class );
+        SerializableAs alias = clazz.getAnnotation( SerializableAs.class );
 
-            if ( ( alias != null ) && ( alias.value() != null ) ) {
-                return alias.value();
-            }
+        if ( ( alias != null ) && ( alias.value() != null ) ) {
+            return alias.value();
         }
 
         return clazz.getName();

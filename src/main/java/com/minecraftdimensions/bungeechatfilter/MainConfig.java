@@ -7,7 +7,11 @@ import java.io.File;
 
 public class MainConfig {
 
-    public static String configpath = File.separator + "plugins" + File.separator + "BungeeChatFilter" + File.separator + "config.yml";
-    public static Config c = new Config( configpath );
+    public MainConfig() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static final String CONFIGPATH = File.separator + "plugins" + File.separator + "BungeeChatFilter" + File.separator + "config.yml";
+    public static Config config = new Config(CONFIGPATH);
 
 }

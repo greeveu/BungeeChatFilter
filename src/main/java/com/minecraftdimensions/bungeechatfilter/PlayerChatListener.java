@@ -8,87 +8,77 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.time.Instant;
+
 public class PlayerChatListener implements Listener {
 
     @EventHandler
-    public void playerChat( ChatEvent e ) {
-        if ( e.getSender() instanceof ProxiedPlayer ) {
-            ProxiedPlayer player = ( ProxiedPlayer ) e.getSender();
-            if ( !player.hasPermission( "bungeefilter.bypass" ) ) {
-                if ( !Main.COMMANDS && isChatCommand( e.getMessage() ) ) {
-                    return;
-                }
-                if(Main.NOREPEAT){
-                    if(repeatCheck(player.getName(), e.getMessage())){
-                        e.setCancelled( true );
-                        player.sendMessage( new TextComponent( ChatColor.RED + "Please do not spam" ) );
-                        return;
-                    }else{
-                        Main.ANTIREPEAT.put( player.getName(), e.getMessage() );
-                    }
+    public void playerChat(ChatEvent e) {
+        if (!(e.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
 
-                }
-                if ( Main.NOSPAM ) {
-                    if ( spamCheck( player, e.getMessage(), System.currentTimeMillis()) ) {
-                        e.setCancelled( true );
-                        player.sendMessage( new TextComponent( ChatColor.RED + "Please do not spam" ) );
-                        return;
-                    } else {
-                        Main.ANTISPAM.put( player.getName(),System.currentTimeMillis());
-                    }
-                }
-                for ( Rule r : Main.RULES ) {
-                    if(r.hasPermission()){
-                        if(!r.needsPerm && player.hasPermission( r.getPermission() )){
-                            return;
-                        }
-                        if(r.needsPerm && !player.hasPermission( r.getPermission() )){
-                            return;
-                        }
-                    }
-                    if ( r.doesMessageContainRegex( e.getMessage() ) ) {
-                        r.performActions( e, player );
-                    }
-                }
+        ProxiedPlayer player = (ProxiedPlayer) e.getSender();
+
+        if (player.hasPermission("bungeefilter.bypass")) {
+            return;
+        }
+
+        if (Main.getInstance().isNorepeat()) {
+            if (repeatCheck(player.getName(), e.getMessage())) {
+                e.setCancelled(true);
+                player.sendMessage(new TextComponent(ChatColor.RED + "Please do not spam"));
+                return;
+            } else {
+                Main.getInstance().getAntirepeat().put(player.getName(), e.getMessage());
+            }
+
+        }
+
+        if (Main.getInstance().isNospam()) {
+            if (spamCheck(player)) {
+                e.setCancelled(true);
+                player.sendMessage(new TextComponent(ChatColor.RED + "Please do not spam"));
+                return;
+            } else {
+                Main.getInstance().getAntispam().put(player.getName(), Instant.now());
             }
         }
 
+        for (Rule rule : Main.getInstance().getRules()) {
+            if (rule.getPermission() != null) {
+                if (rule.getPermissionType() == PermissionType.BYPASS && player.hasPermission(rule.getPermission())) {
+                    return;
+                }
+                if (rule.getPermissionType() == PermissionType.REQUIRED && !player.hasPermission(rule.getPermission())) {
+                    return;
+                }
+            }
+            if (rule.doesMessageContainRegex(e.getMessage())) {
+                rule.performActions(e, player);
+            }
+        }
     }
 
-    private boolean repeatCheck( String name, String message ) {
-        if(isChatCommand( message ) && !isMonitoredCommand( message )){
-            return false;
-        }
-        if ( Main.ANTIREPEAT.containsKey( name ) ) {
-            return Main.ANTIREPEAT.get( name ).equals( message );
+    private boolean repeatCheck(String name, String message) {
+        if (Main.getInstance().getAntirepeat().containsKey(name)) {
+            return Main.getInstance().getAntirepeat().get(name).equals(message);
         }
         return false;
     }
 
-    private boolean spamCheck( ProxiedPlayer player,String message, long time ) {
-        if(isChatCommand( message ) && !isMonitoredCommand( message )){
-            return false;
-        }
-        if ( Main.ANTISPAM.containsKey( player.getName() ) ) {
-            Long diff = time-Main.ANTISPAM.get( player.getName() );
-            return diff<Main.SPAMTIMER;
+    private boolean spamCheck(ProxiedPlayer player) {
+        if (Main.getInstance().getAntispam().containsKey(player.getName())) {
+            return Main.getInstance().getAntispam().get(player.getName())
+                    .plusSeconds(Main.getInstance().getSpamtimer())
+                    .isAfter(Instant.now());
         }
         return false;
     }
 
     @EventHandler
-    public void playerLogOut( PlayerDisconnectEvent e ) {
-          if(Main.ANTISPAM.containsKey( e.getPlayer().getName() )){
-              Main.ANTISPAM.remove( e.getPlayer().getName() );
-          }
+    public void playerLogOut(PlayerDisconnectEvent e) {
+        Main.getInstance().getAntispam().remove(e.getPlayer().getName());
+        Main.getInstance().getAntirepeat().remove(e.getPlayer().getName());
     }
-
-    public boolean isChatCommand( String message ) {
-        return message.startsWith( "/" );
-    }
-
-    public boolean isMonitoredCommand(String command){
-        return  Main.COMLIST.contains( command.substring( 1, command.length() ).split( " " )[0]);
-    }
-
 }

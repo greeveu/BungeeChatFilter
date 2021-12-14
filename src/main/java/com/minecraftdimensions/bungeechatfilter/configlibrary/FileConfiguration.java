@@ -32,7 +32,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
 
     public abstract String saveToString();
 
-    public void load( File file ) throws FileNotFoundException, IOException, InvalidConfigurationException {
+    public void load( File file ) throws IOException, InvalidConfigurationException {
         load( new FileInputStream( file ) );
     }
 
@@ -57,7 +57,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         loadFromString( builder.toString() );
     }
 
-    public void load( String file ) throws FileNotFoundException, IOException, InvalidConfigurationException {
+    public void load( String file ) throws IOException, InvalidConfigurationException {
 
         load( new File( file ) );
     }
