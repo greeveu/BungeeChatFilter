@@ -20,12 +20,15 @@ public class PlayerChatListener implements Listener {
         }
 
         for (Rule rule : Main.getInstance().getRules()) {
+            if (rule.isIgnoreCommands() && e.getMessage().startsWith("/")) {
+                continue;
+            }
             if (rule.getPermission() != null) {
                 if (rule.getPermissionType() == PermissionType.BYPASS && player.hasPermission(rule.getPermission())) {
-                    return;
+                    continue;
                 }
                 if (rule.getPermissionType() == PermissionType.REQUIRED && !player.hasPermission(rule.getPermission())) {
-                    return;
+                    continue;
                 }
             }
             if (rule.doesMessageContainRegex(e.getMessage())) {

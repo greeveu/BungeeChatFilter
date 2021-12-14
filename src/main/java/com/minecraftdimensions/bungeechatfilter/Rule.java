@@ -13,23 +13,35 @@ import java.util.regex.Pattern;
 
 public class Rule {
 
+    @Getter
+    private final String permission;
+
+    @Getter
+    private final PermissionType permissionType;
+
+    @Getter
+    private final boolean ignoreCommands;
+
     private final Pattern regex;
     private final Pattern ignore;
     private final Pattern server;
     private final Map<String, String[]> actions;
-    @Getter
-    private final String permission;
-    @Getter
-    private final PermissionType permissionType;
     private final Random rand = new Random();
 
-    public Rule(String regex, Map<String, String[]> actions, String permission, String ignores, String server, PermissionType permissionType) {
+    public Rule(String regex,
+                Map<String, String[]> actions,
+                String permission,
+                String ignores,
+                String server,
+                PermissionType permissionType,
+                boolean ignoreCommands) {
         this.regex = Pattern.compile(regex);
         this.ignore = ignores == null ? null : Pattern.compile(ignores);
         this.server = server == null ? null : Pattern.compile(server);
         this.actions = actions;
         this.permission = permission;
         this.permissionType = permissionType;
+        this.ignoreCommands = ignoreCommands;
     }
 
     public Matcher getMatcher(String message) {

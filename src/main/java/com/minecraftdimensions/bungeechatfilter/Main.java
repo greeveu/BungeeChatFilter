@@ -72,9 +72,10 @@ public class Main extends Plugin {
             String ignore = config.getString("rules." + node + ".ignores");
             String server = config.getString("rules." + node + ".server");
             PermissionType permissionType = PermissionType.valueOf(config.getString("rules." + node + ".permissiontype", "BYPASS"));
+            boolean ignoreCommands = config.getBoolean("rules." + node + ".ignoreCommands", false);
             Map<String, String[]> actions = extractActions(node);
 
-            rules.add(new Rule(regex, actions, perm, ignore, server, permissionType));
+            rules.add(new Rule(regex, actions, perm, ignore, server, permissionType, ignoreCommands));
         }
         logger.log(Level.INFO, rules.size() + " filter rules loaded!");
     }
