@@ -71,13 +71,13 @@ public class Rule {
                     broadcast(player, message, action);
                     break;
                 case "scommand":
-                    player.chat(action.getValue()[0]);
+                    player.chat(parseVariables(action.getValue()[0], event));
                     break;
                 case "pcommand":
-                    ProxyServer.getInstance().getPluginManager().dispatchCommand(player, action.getValue()[0]);
+                    ProxyServer.getInstance().getPluginManager().dispatchCommand(player, parseVariables(action.getValue()[0], event));
                     break;
                 case "ccommand":
-                    ProxyServer.getInstance().getPluginManager().dispatchCommand(ProxyServer.getInstance().getConsole(), action.getValue()[0].replace("{player}", player.getName()));
+                    ProxyServer.getInstance().getPluginManager().dispatchCommand(ProxyServer.getInstance().getConsole(), parseVariables(action.getValue()[0], event));
                     break;
                 case "remove":
                     message = message.replaceAll(regex.pattern(), "");
@@ -150,5 +150,25 @@ public class Rule {
 
     private String color(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
+    }
+
+    /**
+     * @Author zedwick (https://github.com/zedwick/BungeeChatFilter/blob/master/src/main/java/com/minecraftdimensions/bungeechatfilter/util.java)
+     */
+    private String parseVariables(String string, ChatEvent event) {
+        ProxiedPlayer player = (ProxiedPlayer) event.getSender();
+        String message = event.getMessage();
+        String arguments = "";
+
+        if (message.split(" ", 2).length > 1) {
+            arguments = message.split(" ", 2)[1];
+        }
+
+        string = string
+                .replace("{player}", player.getDisplayName())
+                .replace("{message}", message)
+                .replace("{arguments}", arguments);
+
+        return string;
     }
 }
