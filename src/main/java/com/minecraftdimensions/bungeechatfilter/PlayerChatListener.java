@@ -70,7 +70,7 @@ public class PlayerChatListener implements Listener {
     private boolean spamCheck(ProxiedPlayer player) {
         if (Main.getInstance().getAntispam().containsKey(player.getName())) {
             return Main.getInstance().getAntispam().get(player.getName())
-                    .plusSeconds(Main.getInstance().getSpamtimer())
+                    .plusMillis(Main.getInstance().getSpamtimer())
                     .isAfter(Instant.now());
         }
         return false;
