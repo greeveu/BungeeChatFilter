@@ -1,11 +1,17 @@
-# WARNING: This isnt a drop in replacement! The config and the way you need to set certian values has changed!
-# Changes:
-# - Removed "Monitor Commands" and "Commands". You do not have to specify which commands you want to monitor. You can from now on simply monitor all of them. To ignore them just dont write regex which matches.
-# - Its no longer possible to define a regex over multiple lines. Just use a "|" to combine the regex.
-# - Removed the AntiSpam and AntiRepeat function. Feel free to use another plugin like 2ls chatsentinel for that. (Or make a PR to add a good AntiSpam and AntiRepeat)
-# + You may define a "server" per rule. This has to be a regex and the actions will only execute if the regex finds a match with the server name. If its ommited it will not check the server name.
-# + You may use the "permissiontype" field to define how a permission check should work. You may either have a bypass permission or a required permission. Default is: BYPASS
+## BungeeChatFilter
 
+**WARNING: This isnt a drop in replacement! The config and the way you need to set certian values has changed!**
+
+__Changes:__
+- Removed `Monitor Commands` and `Commands`. You do not have to specify which commands you want to monitor. You can from now on simply monitor all of them. To ignore them just dont write regex which matches.
+- Its no longer possible to define a regex over multiple lines. Just use a `|` to combine the regex.
+- Removed the `AntiSpam` and `AntiRepeat` function. Feel free to use another plugin like 2ls chatsentinel for that. (or make a PR to add a good AntiSpam and AntiRepeat)
++ You may define a `server` field per rule. This has to be a regex and the actions will only execute if the regex finds a match with the server name. If its ommited it will not check the server name.
++ You may use the `permissiontype` field to define how a permission check should work. You may either have a bypass permission or a required permission. Default is: `BYPASS`
++ You can add `ignoreCommands: true` if you want a rule to ignore commands.
++ You can use `{player}`, `{message}` and `{arguments}` in the `pcommand`, `scommand` and `ccommand` message
+
+```yaml
 ##########################################
 ##                                      ##
 ##      Bungee Chat Filter Config       ##
@@ -135,3 +141,4 @@ rules:
         actions:
             message: "&l&6[Check it out]&3 This server's website is &6www.minecraftserver.com"
             deny: true
+```
