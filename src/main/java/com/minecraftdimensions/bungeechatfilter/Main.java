@@ -71,7 +71,7 @@ public class Main extends Plugin {
             String perm = config.getString("rules." + node + ".permission");
             String ignore = config.getString("rules." + node + ".ignores");
             String server = config.getString("rules." + node + ".server");
-            PermissionType permissionType = PermissionType.valueOf(config.getString("rules." + node + ".permissiontype"));
+            PermissionType permissionType = PermissionType.valueOf(config.getString("rules." + node + ".permissiontype", "BYPASS"));
             Map<String, String[]> actions = extractActions(node);
 
             rules.add(new Rule(regex, actions, perm, ignore, server, permissionType));

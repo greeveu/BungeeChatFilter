@@ -19,7 +19,6 @@ public class BFReload extends Command {
         MainConfig.config = new Config(MainConfig.CONFIGPATH);
         Main.getInstance().getRules().clear();
         Main.getInstance().setConfig(MainConfig.config);
-        Main.getInstance().setNospam(Main.getInstance().getConfig().getBoolean("AntiSpam", true));
         Main.getInstance().loadRules();
         sender.sendMessage("BungeeFilter Reloaded");
     }
