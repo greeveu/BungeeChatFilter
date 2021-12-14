@@ -6,7 +6,6 @@ import lombok.Setter;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.*;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,24 +19,7 @@ public class Main extends Plugin {
     private static Main instance;
 
     @Getter
-    private long spamtimer = 0;
-
-    @Getter
     private ArrayList<Rule> rules;
-
-    @Getter
-    private final HashMap<String, Instant> antispam = new HashMap<>();
-
-    @Getter
-    private final HashMap<String, String> antirepeat = new HashMap<>();
-
-    @Getter
-    @Setter
-    private boolean nospam;
-
-    @Getter
-    @Setter
-    private boolean norepeat;
 
     @Getter
     @Setter
@@ -78,9 +60,6 @@ public class Main extends Plugin {
             }
         }
         config = MainConfig.config;
-        nospam = config.getBoolean("AntiSpam", true);
-        norepeat = config.getBoolean("AntiRepeat", true);
-        spamtimer = config.getInt("Minimum-Chat-Delay");
         loadRules();
     }
 
