@@ -2,6 +2,7 @@ package com.minecraftdimensions.bungeechatfilter;
 
 import com.minecraftdimensions.bungeechatfilter.configlibrary.Config;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 
 /**
@@ -16,10 +17,10 @@ public class BFReload extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        MainConfig.config = new Config(MainConfig.CONFIGPATH);
+        MainConfig.setConfig(new Config(MainConfig.getCONFIGPATH()));
         Main.getInstance().getRules().clear();
-        Main.getInstance().setConfig(MainConfig.config);
+        Main.getInstance().setConfig(MainConfig.getConfig());
         Main.getInstance().loadRules();
-        sender.sendMessage("BungeeFilter Reloaded");
+        sender.sendMessage(new TextComponent("BungeeFilter Reloaded"));
     }
 }
