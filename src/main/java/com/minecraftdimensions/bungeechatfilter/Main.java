@@ -25,15 +25,11 @@ public class Main extends Plugin {
     @Setter
     private Config config;
 
-    @Getter
-    private static Logger logger;
-
     public void onEnable() {
         instance = this;
         initialiseConfig();
         this.getProxy().getPluginManager().registerListener(this, new PlayerChatListener());
         this.getProxy().getPluginManager().registerCommand(this, new BFReload("bungeefilterreload", "bungeefilter.reload", "bfreload", "reloadbf"));
-        logger = this.getProxy().getLogger();
     }
 
     private void initialiseConfig() {
@@ -77,7 +73,7 @@ public class Main extends Plugin {
 
             rules.add(new Rule(regex, actions, perm, ignore, server, permissionType, ignoreCommands));
         }
-        logger.log(Level.INFO, rules.size() + " filter rules loaded!");
+        getProxy().getLogger().log(Level.INFO, rules.size() + " filter rules loaded!");
     }
 
     private Map<String, String[]> extractActions(String node) {
