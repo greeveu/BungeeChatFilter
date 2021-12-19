@@ -29,6 +29,7 @@ __Changes:__
 #       actions: - here is the list of actions the rule will perform if matched
 #           deny: true      - this will deny the message and cancel the event
 #           message: (message)      -this will send a message (message) to the player
+#           ignoreCommands: true         - Should the rule be irgnored if it was a command?
 #           kick: (message)     - this will kick the player with the (message)
 #           alert: (message)        - this will send a broadcast to the server {player} will be replaced with the players display name
 #           command: /(command)     - this will cause the player to send the (command)
